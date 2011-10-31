@@ -26,8 +26,8 @@ public class ShreddedImagePiecesRecognizer {
 			long averageRed = 0;
 			long averageGreen = 0;
 			long averageBlue = 0;
-			width = image.getWidth() / 4;
-			height = image.getHeight() / 4;
+			width = image.getWidth();
+			height = image.getHeight();
 			int size = width * height;
 			pixels = new Color[size];
 			for (int r = 0; r < height; ++r) {
