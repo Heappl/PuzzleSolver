@@ -24,6 +24,7 @@ public class DeshredderDisplay extends JFrame {
 	JPanel imagePanel = new JPanel();
 	JFileChooser fileChooser = new JFileChooser();
 	JFileChooser saveDirChooser = new JFileChooser();
+	JFileChooser readSaveDirChooser = new JFileChooser();
 	BufferedImage[] images = new BufferedImage[0];
 	JLabel[] imageLabels = new JLabel[0];
 	ShreddedPiecesStateStorage state = new ShreddedPiecesStateStorage();
@@ -55,20 +56,34 @@ public class DeshredderDisplay extends JFrame {
 				}
 			}
 		});
+
+		readSaveDirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		JMenuItem loadMenuItem = new JMenuItem("Read saved data");
+		menu.add(loadMenuItem);
+		loadMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (readSaveDirChooser.showOpenDialog(DeshredderDisplay.this) == JFileChooser.APPROVE_OPTION) {
+					state.readState(readSaveDirChooser.getSelectedFile());
+					images = state.getImages();
+					displayPieces(true);
+				}
+			}
+		});
 		
 		setJMenuBar(menuBar);
 	}
 	
 	private void displayPieces(boolean fromFile) {
+		System.err.println("TESTING " + this.images.length);
 		imageLabels = new JLabel[images.length];
 		for (int i = 0; i < images.length; ++i) {
 			ImageIcon imageIcon = new ImageIcon(images[i].getScaledInstance(
 					images[i].getWidth() / 4, images[i].getHeight() / 4, 0));
 			JLabel imageLabel = new JLabel();
+			imageLabel.setIcon(imageIcon);
 			ImageMover imageMover = new ImageMover(images[i], imagePanel, this, state, state.getAngle(images[i]), imageLabel);
 			imageLabel.addMouseMotionListener(imageMover);
 			imageLabel.addMouseWheelListener(imageMover);
-			imageLabel.setIcon(imageIcon);
 			imagePanel.add(imageLabel, BorderLayout.CENTER);
 			imageLabels[i] = imageLabel;
 		}

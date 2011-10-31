@@ -21,7 +21,7 @@ class ImageMover implements MouseMotionListener, MouseWheelListener {
 	Point mouseOnImage = new Point(0, 0);
 	BufferedImage image;
 	double rotationAngle = 0;
-	double rotationStep = Math.PI / 100.0;
+	double rotationStep = Math.PI / 1000.0;
 	JPanel imagePanel;
 	JFrame mainFrame;
 	ShreddedPiecesStateStorage state;
@@ -38,8 +38,8 @@ class ImageMover implements MouseMotionListener, MouseWheelListener {
 		this.mainFrame = mainFrame;
 		this.state = state;
 		this.rotationAngle = angle;
-		if (angle != 0) updateAngle();
 		this.imageLabel = imageLabel;
+		if (angle != 0) updateAngle();
 	}
 
 	@Override
@@ -58,7 +58,7 @@ class ImageMover implements MouseMotionListener, MouseWheelListener {
 	public void mouseMoved(MouseEvent e) {
 		mouseOnImage.x = 0;
 		mouseOnImage.y = 0;
-		this.rotationStep = Math.PI / 100.0;
+		this.rotationStep = Math.PI / 1000.0;
 	}
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {

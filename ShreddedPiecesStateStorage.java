@@ -1,14 +1,15 @@
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Hashtable;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 
 class PieceState {
 	public Point location;
@@ -68,10 +69,26 @@ public class ShreddedPiecesStateStorage {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+		System.err.println("SAVED");
 	}
-
+	
 	public void readState(File selectedFile) {
-		
+		File saveFile = new File(selectedFile.getAbsoluteFile() + "/save.txt");
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(saveFile));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String[] tokens = line.split(" ");
+				File imageFile = new File(tokens[0]);
+				BufferedImage image = ImageIO.read(imageFile);
+				Point location = new Point(Integer.valueOf(tokens[1].split("=")[1]),
+										   Integer.valueOf(tokens[2].split("=")[1]));
+				setImageLocation(image, location);
+				setImageAngle(image, Double.valueOf(tokens[3].split("=")[1]));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		System.err.println("LOADED");
 	}
 }
