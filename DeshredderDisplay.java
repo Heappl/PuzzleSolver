@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -50,9 +51,7 @@ public class DeshredderDisplay extends JFrame {
 		saveMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (saveDirChooser.showOpenDialog(DeshredderDisplay.this) == JFileChooser.APPROVE_OPTION) {
-					state.readState(fileChooser.getSelectedFile());
-					images = state.getImages();
-					displayPieces(true);
+					state.save(saveDirChooser.getSelectedFile());
 				}
 			}
 		});

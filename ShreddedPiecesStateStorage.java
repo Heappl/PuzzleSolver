@@ -1,7 +1,14 @@
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Hashtable;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 class PieceState {
 	public Point location;
@@ -12,9 +19,6 @@ public class ShreddedPiecesStateStorage {
 	
 	Hashtable<BufferedImage, Point> locations = new Hashtable<BufferedImage, Point>();
 	Hashtable<BufferedImage, Double> angles = new Hashtable<BufferedImage, Double>();
-	
-	public ShreddedPiecesStateStorage() {
-	}
 	
 	public void setImageLocation(BufferedImage image, Point location) {
 		locations.put(image, location);
@@ -38,8 +42,36 @@ public class ShreddedPiecesStateStorage {
 	}
 	
 	public void save(File dir) {
+		System.err.println(dir.getAbsolutePath());
+		
+		dir.mkdir();
+		String[] data = new String[locations.size()];
+		int index = 0;
+		for (BufferedImage image : locations.keySet()) {
+			Point location = getLocation(image);
+			double angle = getAngle(image);
+			String imagePath = dir.getAbsolutePath() + "/image" +  index + ".png";
+			data[index] = imagePath + " x=" + location.x + " y=" + location.y + " angle=" + angle + "\n";
+			index++;
+			File outputFile = new File(imagePath);
+			try {
+				ImageIO.write(image, "png", outputFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		try {
+			FileWriter save = new FileWriter(dir.getAbsoluteFile() + "/save.txt");
+			BufferedWriter writer = new BufferedWriter(save);
+			for (String line : data) writer.write(line);
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public void readState(File selectedFile) {
+		
 	}
 }
