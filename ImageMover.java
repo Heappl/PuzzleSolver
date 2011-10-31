@@ -21,6 +21,7 @@ class ImageMover implements MouseMotionListener, MouseWheelListener {
 	Point mouseOnImage = new Point(0, 0);
 	BufferedImage image;
 	double rotationAngle = 0;
+	double rotationStep = Math.PI / 100.0;
 	JPanel imagePanel;
 	JFrame mainFrame;
 	
@@ -44,11 +45,13 @@ class ImageMover implements MouseMotionListener, MouseWheelListener {
 	public void mouseMoved(MouseEvent e) {
 		mouseOnImage.x = 0;
 		mouseOnImage.y = 0;
+		this.rotationStep = Math.PI / 100.0;
 	}
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		if (mouseOnImage.x != 0) {
-			this.rotationAngle += Math.PI / 100.0 * e.getPreciseWheelRotation();
+			this.rotationAngle += this.rotationStep * e.getPreciseWheelRotation();
+			this.rotationStep = Math.min(this.rotationStep * 1.25, Math.PI / 4);
 			
 			AffineTransform at = new AffineTransform();
 			at.rotate(this.rotationAngle, image.getWidth(null) / 2, image.getHeight(null) / 2);
