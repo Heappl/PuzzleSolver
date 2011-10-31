@@ -1,20 +1,10 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-import java.awt.image.AffineTransformOp;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
@@ -32,20 +22,37 @@ public class DeshredderDisplay extends JFrame {
 	
 	JPanel imagePanel = new JPanel();
 	JFileChooser fileChooser = new JFileChooser();
+	JFileChooser saveDirChooser = new JFileChooser();
 	BufferedImage[] images = new BufferedImage[0];
+	JLabel[] imageLabels = new JLabel[0];
+	ShreddedPiecesStateStorage state = new ShreddedPiecesStateStorage();
 	
 	private void createMenu() {
 		JMenuBar menuBar = new JMenuBar();
 		JMenu menu = new JMenu("File");
-		JMenuItem openFileMenuItem = new JMenuItem("Open File");
 		add(menuBar);
 		menuBar.add(menu);
+
+		JMenuItem openFileMenuItem = new JMenuItem("Open File");
 		menu.add(openFileMenuItem);
 		openFileMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (fileChooser.showOpenDialog(DeshredderDisplay.this) == JFileChooser.APPROVE_OPTION) {
 					images = new ShreddedImagePiecesRecognizer(fileChooser.getSelectedFile()).retrievePieces();
-					displayPieces();
+					displayPieces(false);
+				}
+			}
+		});
+
+		saveDirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		JMenuItem saveMenuItem = new JMenuItem("Save to directory");
+		menu.add(saveMenuItem);
+		saveMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (saveDirChooser.showOpenDialog(DeshredderDisplay.this) == JFileChooser.APPROVE_OPTION) {
+					state.readState(fileChooser.getSelectedFile());
+					images = state.getImages();
+					displayPieces(true);
 				}
 			}
 		});
@@ -53,18 +60,55 @@ public class DeshredderDisplay extends JFrame {
 		setJMenuBar(menuBar);
 	}
 	
-	private void displayPieces() {
+	private void displayPieces(boolean fromFile) {
+		imageLabels = new JLabel[images.length];
 		for (int i = 0; i < images.length; ++i) {
 			ImageIcon imageIcon = new ImageIcon(images[i].getScaledInstance(
 					images[i].getWidth() / 4, images[i].getHeight() / 4, 0));
 			JLabel imageLabel = new JLabel();
-			ImageMover imageMover = new ImageMover(images[i], imagePanel, this);
+			ImageMover imageMover = new ImageMover(images[i], imagePanel, this, state, state.getAngle(images[i]), imageLabel);
 			imageLabel.addMouseMotionListener(imageMover);
 			imageLabel.addMouseWheelListener(imageMover);
 			imageLabel.setIcon(imageIcon);
 			imagePanel.add(imageLabel, BorderLayout.CENTER);
+			imageLabels[i] = imageLabel;
 		}
 		this.setVisible(true);
+		if (fromFile){
+			for (int i = 0; i < images.length; ++i) {
+				imageLabels[i].setLocation(state.getLocation(images[i]));
+			}
+			this.repaint();
+		} else {
+			for (int i = 0; i < images.length; ++i) {
+				state.setImageLocation(images[i], imageLabels[i].getLocation());
+			}
+		}
+		
+		this.addComponentListener(new ComponentListener() {
+			@Override
+			public void componentShown(ComponentEvent e) {
+				for (int i = 0; i < images.length; ++i) {
+					imageLabels[i].setLocation(state.getLocation(images[i]));
+				}
+			}
+			@Override
+			public void componentResized(ComponentEvent e) {
+				for (int i = 0; i < images.length; ++i) {
+					imageLabels[i].setLocation(state.getLocation(images[i]));
+				}
+			}
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				for (int i = 0; i < images.length; ++i) {
+					imageLabels[i].setLocation(state.getLocation(images[i]));
+				}
+			}
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				System.err.println("componentHidden");
+			}
+		});
 	}
 	
 	public DeshredderDisplay() {
